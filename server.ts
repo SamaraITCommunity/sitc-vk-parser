@@ -17,6 +17,7 @@ let telegram = new TelegramAPI(config.TELEGRAM_API_KEY);
 discord.on('ready', () => {
     console.log(`Дискорд бот работает на аккаунте ${discord.user.tag}!`);
 });
+
 discord.login(config.DISCORD_API_KEY);
 
 vk_parser.ee.on('ready', () => console.log('Начали слушать группу в ВК'));
@@ -94,6 +95,10 @@ vk_parser.ee.on('newPost', (post: VKPost) => {
     });
     let date = new Date();
     let id = utils.randomString(16);
+
+    let photos: string;
+    if (post.attachments.length > 0) photos = post.attachments.filter(a => a.type == 'photo').map((p: VKPhoto) => `\n\n![Alt](${p.photo.sizes[p.photo.sizes.length - 1].url})`).join('');
+    else photos = '';
     request.put(`https://api.github.com/repos/${config.GITHUB_USERNAME}/${config.GITHUB_REPO_NAME}/contents/content/${id}.md`, {
         json: true,
         headers: {
@@ -104,7 +109,7 @@ vk_parser.ee.on('newPost', (post: VKPost) => {
             message: `Новый пост - ${id}.md`,
             content:
                 Buffer.from(
-                    `+++ title = "${gitText ? gitText.split('\n')[0] : `${id}.md`}" date = ${moment(date).format('YYYY-MM-DD')} description = "${gitText ? gitText.slice(0, 25) : 'Описание отсутствует'}..." +++\n\n${post.attachments.filter(a => a.type == 'photo').map((p: VKPhoto) => `\n\n![Alt](${p.photo.sizes[p.photo.sizes.length - 1].url})`)}`).toString('base64')
+                    `+++ title = "${gitText ? gitText.split('\n')[0] : `${id}.md`}" date = ${moment(date).format('YYYY-MM-DD')} description = "${gitText ? gitText.slice(0, 25) : 'Описание отсутствует'}..." +++\n\n${photos}`).toString('base64')
         }
     }, (err, _, __) => {
         if (err) console.error(err);
