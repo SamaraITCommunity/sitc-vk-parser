@@ -10,7 +10,7 @@
 
 ✔️ Ваш код должен быть опубликован на GitHub с FOSS лицензией. [Все элементы проекта не имеют конфликта лицензий]
 
-![FOSSA Status](link will be added after init)
+![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffax1ty%2Fsitc-vk-parser.svg?type=large)
 
 ❌ Публикация в Instagram (невозможна по правилам Facebook)
 
