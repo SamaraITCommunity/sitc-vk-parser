@@ -4,8 +4,8 @@ import queryString = require('query-string');
 import { EventEmitter } from 'events';
 
 import { VKResponse, VKWallGetResponse } from '../../interfaces';
-import utils = require('../utils');
 import { db } from './../../server';
+import { getTimestamp } from '../utils';
 
 let API_GATEWAY = 'https://api.vk.com/method';
 
@@ -54,7 +54,7 @@ export = class VKParser {
         setInterval(() => {
             this.getPosts({ owner_id: this.groupID })
                 .then(data => {
-                    let chectTime = utils.getTimestamp();
+                    let chectTime = getTimestamp();
                     if (data.items.length > 0)
                         if (data.items[0].date > this.lastCheckTime) data.items.forEach((post, i, arr) => {
                             if (post.date > this.lastCheckTime)
