@@ -5,6 +5,7 @@ import { EventEmitter } from 'events';
 
 import { VKResponse, VKWallGetResponse } from '../../interfaces';
 import utils = require('../utils');
+import { db } from './../../server';
 
 let API_GATEWAY = 'https://api.vk.com/method';
 
@@ -14,7 +15,7 @@ export = class VKParser {
 
     ee = new EventEmitter();
 
-    private lastCheckTime = utils.getTimestamp();
+    private lastCheckTime = db.get('vk.lastCheckTime').value();
 
     private call(method: string, action: string, data: any) {
         return new Promise((resolve, reject) => {
@@ -58,7 +59,10 @@ export = class VKParser {
                         if (data.items[0].date > this.lastCheckTime) data.items.forEach((post, i, arr) => {
                             if (post.date > this.lastCheckTime)
                                 this.ee.emit('newPost', post);
-                            if (i == arr.length - 1) this.lastCheckTime = chectTime;
+                            if (i == arr.length - 1) {
+                                this.lastCheckTime = chectTime;
+                                db.set('vk.lastCheckTime', chectTime).write();
+                            }
                         });
                 })
                 .catch(err => this.ee.emit('error', err));
