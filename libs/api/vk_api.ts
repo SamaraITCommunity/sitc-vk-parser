@@ -54,14 +54,14 @@ export = class VKParser {
         setInterval(() => {
             this.getPosts({ owner_id: this.groupID })
                 .then(data => {
-                    let chectTime = getTimestamp();
+                    let checkTime = getTimestamp();
                     if (data.items.length > 0)
                         if (data.items[0].date > this.lastCheckTime) data.items.forEach((post, i, arr) => {
                             if (post.date > this.lastCheckTime)
                                 this.ee.emit('newPost', post);
                             if (i == arr.length - 1) {
-                                this.lastCheckTime = chectTime;
-                                db.set('vk.lastCheckTime', chectTime).write();
+                                this.lastCheckTime = checkTime;
+                                db.set('vk.lastCheckTime', checkTime).write();
                             }
                         });
                 })
