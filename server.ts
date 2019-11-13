@@ -6,7 +6,7 @@ import VKParser = require('./libs/api/vk_api');
 import { VKPost } from './interfaces';
 import TelegramAPI = require('./libs/api/telegram_api');
 import config = require('./config');
-import { QueueManager } from './libs/utils';
+import { QueueManager, getTimestamp } from './libs/utils';
 let queueManager = new QueueManager();
 
 // БД
@@ -15,7 +15,10 @@ import FileSync = require('lowdb/adapters/FileSync');
 let adapter = new FileSync('db.json');
 export let db = low(adapter);
 db.defaults({
-    vk: { lastCheckTime: 0 }
+    queue: {
+        tasks: {}
+    },
+    vk: { lastCheckTime: getTimestamp() }
 })
     .write();
 
@@ -33,7 +36,9 @@ vk_parser.ee.on('ready', () => console.log('Начали слушать груп
 vk_parser.ee.on('error', err => console.error(`Произошла ошибка! Ошибка: ${err}`));
 vk_parser.ee.on('newPost', (post: VKPost) => {
     queueManager.retryQueue();
-    queueManager.addToQueue('discord', post, true);
-    queueManager.addToQueue('telegram', post, true);
-    queueManager.addToQueue('github', post, true);
+    if (!queueManager.hasPostInQueue(post.id)) {
+        queueManager.addToQueue('discord', post, true);
+        queueManager.addToQueue('telegram', post, true);
+        queueManager.addToQueue('github', post, true);
+    }
 });

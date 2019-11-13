@@ -46,9 +46,17 @@ interface Task {
 }
 
 export class QueueManager {
+    hasPostInQueue(postID: number) {
+        let queue = db.get('queue') as ObjectChain<{ tasks: { [key: string]: Task } }>;
+        return !queue.get('tasks').find(t => t.post.id == postID).isUndefined().value();
+    }
+
     retryQueue() {
         let queue = db.get('queue') as ObjectChain<{ tasks: { [key: string]: Task } }>;
-        queue.get('tasks').forEach(task => this.handle(task));
+        Object.keys(queue.get('tasks').value()).forEach(key => {
+            this.handle(queue.get('tasks').get(key).value());
+            console.log(`Попытался отправить ${key} ещё раз`);
+        });
     }
 
     addToQueue(social: 'telegram' | 'discord' | 'github', post: VKPost, handleImmediately?: boolean) {
@@ -74,7 +82,7 @@ export class QueueManager {
             let id = randomString(16);
 
             let photos: string;
-            if (post.attachments.length > 0) photos = post.attachments.filter(a => a.type == 'photo').map((p: VKPhoto) => `\n\n![Alt](${p.photo.sizes[p.photo.sizes.length - 1].url})`).join('');
+            if (post.attachments) if (post.attachments.length > 0) photos = post.attachments.filter(a => a.type == 'photo').map((p: VKPhoto) => `\n\n![Alt](${p.photo.sizes[p.photo.sizes.length - 1].url})`).join('');
             else photos = '';
             request.put(`https://api.github.com/repos/${config.GITHUB_USERNAME}/${config.GITHUB_REPO_NAME}/contents/content/${id}.md`, {
                 json: true,
@@ -89,9 +97,9 @@ export class QueueManager {
                             `+++ title = "${gitText ? gitText.split('\n')[0] : `${id}.md`}" date = ${moment(date).format('YYYY-MM-DD')} description = "${gitText ? gitText.slice(0, 25) : 'Описание отсутствует'}..." +++\n\n${photos}`).toString('base64')
                 }
             }, (err, res, __) => {
-                if (err) console.error(err);
                 if (!res) console.error('Ошибка при аплоуде на GitHub');
-                else queue.unset(task.id).write();
+                else if (err) console.error('Ошибка при аплоуде на GitHub');
+                else queue.get('tasks').unset(task.id).write();
             });
         }
 
@@ -137,7 +145,7 @@ export class QueueManager {
             }
 
             Promise.all(promiseList)
-                .then(() => queue.unset(task.id).write())
+                .then(() => queue.get('tasks').unset(task.id).write())
                 .catch(err => console.error(`Произошла ошибка при интеракции с Telegram. Ошибка: ${err}`));
         }
 
@@ -183,7 +191,7 @@ export class QueueManager {
             }
 
             Promise.all(promiseList)
-                .then(() => queue.unset(task.id).write())
+                .then(() => queue.get('tasks').unset(task.id).write())
                 .catch(err => console.error(`Произошла ошибка при отправке сообщения в Discord! Ошибка: ${err}`));
         }
     }
