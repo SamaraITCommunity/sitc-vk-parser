@@ -16,10 +16,11 @@ export = class TelegramAPI {
     private call(method: string, data: any) {
         return new Promise((resolve, reject) => {
             request(`${API_GATEWAY}/bot${this.token}/${method}?${queryString.stringify(data)}`, { json: true }, (err, res, body: TelegramResponse) => {
-                if (err) reject(err);
-                if (!body) reject(res.statusCode);
-                if (!body.ok) reject(body.description);
-                resolve(body.result);
+                if (!res) reject('Не достучались до Telegram. Скорее-всего, Ваш провайдер их блокирует');
+                else if (err) reject(err);
+                else if (!body) reject('Не достучались до Telegram. Скорее-всего, Ваш провайдер их блокирует');
+                else if (!body.ok) reject(body.description);
+                else resolve(body.result);
             });
         });
     }

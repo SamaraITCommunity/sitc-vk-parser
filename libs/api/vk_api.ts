@@ -4,7 +4,8 @@ import queryString = require('query-string');
 import { EventEmitter } from 'events';
 
 import { VKResponse, VKWallGetResponse } from '../../interfaces';
-import utils = require('../utils');
+import { db } from './../../server';
+import { getTimestamp } from '../utils';
 
 let API_GATEWAY = 'https://api.vk.com/method';
 
@@ -14,15 +15,16 @@ export = class VKParser {
 
     ee = new EventEmitter();
 
-    private lastCheckTime = utils.getTimestamp();
+    private lastCheckTime = db.get('vk.lastCheckTime').value();
 
     private call(method: string, action: string, data: any) {
         return new Promise((resolve, reject) => {
             request(`${API_GATEWAY}/${method}.${action}?${queryString.stringify(data)}&v=5.103&access_token=${this.token}`, { json: true }, (err, res, body: VKResponse) => {
+                if (!res) reject('Не достучались до VK. Скорее-всего, Ваш провайдер их блокирует');
                 if (err) reject(err);
-                if (!body) reject(res.statusCode);
-                if (body.error) reject(body.error);
-                resolve(body.response);
+                else if (!body) reject('Не достучались до VK. Скорее-всего, Ваш провайдер их блокирует');
+                else if (body.error) reject(body.error);
+                else resolve(body.response);
             });
         });
     }
@@ -53,12 +55,15 @@ export = class VKParser {
         setInterval(() => {
             this.getPosts({ owner_id: this.groupID })
                 .then(data => {
-                    let chectTime = utils.getTimestamp();
+                    let checkTime = getTimestamp();
                     if (data.items.length > 0)
                         if (data.items[0].date > this.lastCheckTime) data.items.forEach((post, i, arr) => {
                             if (post.date > this.lastCheckTime)
                                 this.ee.emit('newPost', post);
-                            if (i == arr.length - 1) this.lastCheckTime = chectTime;
+                            if (i == arr.length - 1) {
+                                this.lastCheckTime = checkTime;
+                                db.set('vk.lastCheckTime', checkTime).write();
+                            }
                         });
                 })
                 .catch(err => this.ee.emit('error', err));

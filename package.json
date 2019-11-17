@@ -4,6 +4,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/lowdb": "^1.0.9",
     "@types/moment": "^2.13.0",
     "@types/request": "^2.48.3",
     "typescript": "^3.6.4"
@@ -11,6 +12,7 @@
   "dependencies": {
     "discord.js": "^11.5.1",
     "events": "^3.0.0",
+    "lowdb": "^1.0.0",
     "moment": "^2.24.0",
     "query-string": "^6.8.3",
     "request": "^2.88.0"
