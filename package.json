@@ -11,11 +11,14 @@
   },
   "dependencies": {
     "discord.js": "^11.5.1",
+    "dotenv": "^8.2.0",
     "events": "^3.0.0",
+    "lodash": "^4.17.15",
     "lowdb": "^1.0.0",
     "moment": "^2.24.0",
     "query-string": "^6.8.3",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "ts-node": "^8.6.2"
   },
   "scripts": {
     "start": "ts-node server"

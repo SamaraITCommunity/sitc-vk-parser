@@ -67,6 +67,6 @@ export = class VKParser {
                         });
                 })
                 .catch(err => this.ee.emit('error', err));
-        }, 1000 * 5);
+        }, 1000 * 60 * 30);
     }
 }
