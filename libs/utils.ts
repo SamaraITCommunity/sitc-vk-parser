@@ -130,7 +130,8 @@ export class QueueManager {
                 post.attachments.forEach(attach => {
                     switch (attach.type) {
                         case 'link':
-                            if (attach.link.button.title == 'Читать') {
+                            if (!attach.link.button) promiseList.push(telegram.sendMessage(`Ссылка: "${attach.link.url}". Подробнее - [нажмите на ссылку](${attach.link.url})`, config.TELEGRAM_CHANNEL_ID));
+                            else if (attach.link.button.title == 'Читать') {
                                 promiseList.push(telegram.sendMessage(`Статья "${attach.link.title}". Читать - [нажмите на ссылку](${attach.link.url})`, config.TELEGRAM_CHANNEL_ID));
                             }
                             break;

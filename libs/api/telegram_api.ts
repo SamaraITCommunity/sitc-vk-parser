@@ -26,9 +26,23 @@ export = class TelegramAPI {
     }
 
     sendMessage(text: string, chatID: string) {
+        //todo: сделать это нормальным
+
         chatID = '@' + chatID.replace('@', '');
         return new Promise((resolve, reject) => {
-            this.call('sendMessage', { chat_id: chatID, text: text, parse_mode: 'Markdown' })
+            let hashTags = text.match(new RegExp('(?:\s|^)?#[A-Za-z0-9\-\.\_]+(?:\s|$)', 'gi'));
+            let fixedHashTags = hashTags
+                .map(tag => tag
+                    .replace(new RegExp('_', 'g'), '\\_')
+                    .replace(new RegExp('*', 'g'), '\\*')
+                );
+
+            this.call('sendMessage', {
+                chat_id: chatID, text: text
+                    .split(' ')
+                    .map(word => { if (hashTags.includes(word)) return fixedHashTags[hashTags.indexOf(word)]; else return word; })
+                    .join(' '), parse_mode: 'Markdown'
+            })
                 .then(data => resolve(data))
                 .catch(err => reject(err));
         });

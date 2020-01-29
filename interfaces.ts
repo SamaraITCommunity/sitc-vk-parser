@@ -147,7 +147,7 @@ export interface VKLink extends VKAttachment {
         caption: string;
         description?: string;
         photo: VKPhoto['photo'];
-        button: {
+        button?: {
             title: string;
             action: {
                 type: 'open_url' | '',
