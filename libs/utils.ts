@@ -116,6 +116,7 @@ export class QueueManager {
                     let desc = reg.replace('[', '').replace(']', '').split('|')[1];
                     tgText = tgText.replace(reg, `[${desc}](https://vk.com/${url})`);
                 });
+                console.log(`Going to send message: ${tgText} to channel: ${config.TELEGRAM_CHANNEL_ID}`);
                 promiseList.push(telegram.sendMessage(tgText, config.TELEGRAM_CHANNEL_ID));
             }
 
@@ -154,7 +155,11 @@ export class QueueManager {
 
             let channel = discord.guilds.first().channels.find(channel => channel.name == config.DISCORD_CHANNEL_NAME) as Discord.TextChannel;
             let post = task.post;
-            if (post.text) {
+            if (!channel) {
+                console.log(`Failed to find channel: ${config.DISCORD_CHANNEL_NAME}`);
+            }
+            if (post.text && channel) {
+                console.log(`Going to post ${JSON.stringify(post)} to a channel ${JSON.stringify(channel)}`);
                 let discordText = replaceAll(post.text, '@samara_it_community', '');
                 let check = discordText.match(/\S*\|[^|]*\]/g);
 
@@ -165,7 +170,7 @@ export class QueueManager {
                 promiseList.push(channel.send(discordText));
             }
 
-            if (post.attachments) {
+            if (post.attachments && channel) {
                 post.attachments.forEach(attach => {
                     switch (attach.type) {
                         case 'link':

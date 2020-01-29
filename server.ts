@@ -1,7 +1,5 @@
-// Сторонние либы
+require('dotenv').config();
 import Discord = require('discord.js');
-
-// Какой-то агли код
 import VKParser = require('./libs/api/vk_api');
 import { VKPost } from './interfaces';
 import TelegramAPI = require('./libs/api/telegram_api');
@@ -9,7 +7,6 @@ import config = require('./config');
 import { QueueManager, getTimestamp } from './libs/utils';
 let queueManager = new QueueManager();
 
-// БД
 import low = require('lowdb');
 import FileSync = require('lowdb/adapters/FileSync');
 let adapter = new FileSync('db.json');
@@ -29,11 +26,10 @@ export let telegram = new TelegramAPI(config.TELEGRAM_API_KEY);
 discord.on('ready', () => {
     console.log(`Дискорд бот работает на аккаунте ${discord.user.tag}!`);
 });
-
 discord.login(config.DISCORD_API_KEY);
 
 vk_parser.ee.on('ready', () => console.log('Начали слушать группу в ВК'));
-vk_parser.ee.on('error', err => console.error(`Произошла ошибка! Ошибка: ${err}`));
+vk_parser.ee.on('error', err => console.error(`Произошла ошибка ${err}! Ошибка: ${JSON.stringify(err)}`));
 vk_parser.ee.on('newPost', (post: VKPost) => {
     queueManager.retryQueue();
     if (!queueManager.hasPostInQueue(post.id)) {

@@ -16,10 +16,11 @@ export = class TelegramAPI {
     private call(method: string, data: any) {
         return new Promise((resolve, reject) => {
             request(`${API_GATEWAY}/bot${this.token}/${method}?${queryString.stringify(data)}`, { json: true }, (err, res, body: TelegramResponse) => {
+                console.log('Telegram call result: ${res}');
                 if (!res) reject('Не достучались до Telegram. Скорее-всего, Ваш провайдер их блокирует');
-                else if (err) reject(err);
+                else if (err) reject('Ошибка при обращении к Telegram API ${err}');
                 else if (!body) reject('Не достучались до Telegram. Скорее-всего, Ваш провайдер их блокирует');
-                else if (!body.ok) reject(body.description);
+                else if (!body.ok) reject('Body not ok ${body.description}');
                 else resolve(body.result);
             });
         });
@@ -30,7 +31,7 @@ export = class TelegramAPI {
         return new Promise((resolve, reject) => {
             this.call('sendMessage', { chat_id: chatID, text: text, parse_mode: 'Markdown' })
                 .then(data => resolve(data))
-                .catch(err => reject(err));
+                .catch(err => reject('Error sending message to chat ${err}'));
         });
     }
 
@@ -39,7 +40,7 @@ export = class TelegramAPI {
         return new Promise((resolve, reject) => {
             this.call('sendPhoto', { chat_id: chatID, photo: url })
                 .then(data => resolve(data))
-                .catch(err => reject(err));
+                .catch(err => reject('Error sending photo to chat ${err}'));
         });
     }
 
@@ -48,7 +49,7 @@ export = class TelegramAPI {
         return new Promise((resolve, reject) => {
             this.call('sendAudio', { chat_id: chatID, audio: url })
                 .then(data => resolve(data))
-                .catch(err => reject(err));
+                .catch(err => reject('Error sending audio to chat ${err}'));
         });
     }
 
@@ -57,7 +58,7 @@ export = class TelegramAPI {
         return new Promise((resolve, reject) => {
             this.sendMessage(`https://vk.com/video?z=video${ownerID}_${id}&access_key=${accessKey}`, chatID)
                 .then(data => resolve(data))
-                .catch(err => reject(err));
+                .catch(err => reject('Error sending video to chat ${err}'));
         });
     }
 
@@ -66,7 +67,7 @@ export = class TelegramAPI {
         return new Promise((resolve, reject) => {
             this.call('sendDocument', { chat_id: chatID, document: `${url}&access_key=${access_key}` })
                 .then(data => resolve(data))
-                .catch(err => reject(err));
+                .catch(err => reject('Error sending document to telegram chat ${err}'));
         });
     }
 

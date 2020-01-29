@@ -1,3 +1,5 @@
-config.ts
 /node_modules
 db.json
+.env
+.pnp.js
+.yarn/
