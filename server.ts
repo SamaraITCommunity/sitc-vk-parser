@@ -68,7 +68,7 @@ discord.on('message', msg => {
                 if (args[1] == 'name') {
                     if (args[2]) {
                         discord.user.setUsername(args.slice(2, args.length - 1).join(' '));
-                        msg.channel.send(`Ура! Теперь меня зовут ${args[2]}`)
+                        msg.channel.send(`Ура! Теперь меня зовут ${args.slice(2, args.length - 1).join(' ')}`)
                             .then(() => msg.delete(1000 * 2));
                     }
                     else msg.channel.send('Ошибка! Вы не указали имя')
