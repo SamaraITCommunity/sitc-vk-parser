@@ -40,13 +40,13 @@ discord.on('message', msg => {
                             config.DISCORD_CHANNEL_NAME = newChannel.name;
                             fs.writeFileSync('./config.ts', fs.readFileSync('./config.ts', 'utf8').replace(new RegExp('DISCORD_CHANNEL_NAME: \'([^\s]+)\''), `DISCORD_CHANNEL_NAME: '${newChannel}'`))
                             msg.channel.send(`Ура! Теперь я шлю сообщения на канале ${newChannel}`)
-                                .then(() => msg.delete(1000 * 2));
+                                .then(botMsg => (botMsg as Discord.Message).delete(1000 * 2));
                         }
                         else msg.channel.send('Ошибка! Такого канала не существует')
-                            .then(() => msg.delete(1000 * 2));
+                            .then(botMsg => (botMsg as Discord.Message).delete(1000 * 2));
                     }
                     else msg.channel.send('Ошибка! Вы не указали название нового канала')
-                        .then(() => msg.delete(1000 * 2));
+                        .then(botMsg => (botMsg as Discord.Message).delete(1000 * 2));
                 }
 
                 if (args[1] == 'rate') {
@@ -56,23 +56,23 @@ discord.on('message', msg => {
                             config.VK_CHECK_RATE = time;
                             fs.writeFileSync('./config.ts', fs.readFileSync('./config.ts', 'utf8').replace(new RegExp('VK_CHECK_RATE: \'([^\s]+)\''), `VK_CHECK_RATE: '${time}'`))
                             msg.channel.send(`Ура! Теперь я шлю сообщения раз в ${time} минут(у)`)
-                                .then(() => msg.delete(1000 * 2));
+                                .then(botMsg => (botMsg as Discord.Message).delete(1000 * 2));
                         }
                         else msg.channel.send('Ошибка! Это не число')
-                            .then(() => msg.delete(1000 * 2));
+                            .then(botMsg => (botMsg as Discord.Message).delete(1000 * 2));
                     }
                     else msg.channel.send('Ошибка! Вы не ввели число')
-                        .then(() => msg.delete(1000 * 2));
+                        .then(botMsg => (botMsg as Discord.Message).delete(1000 * 2));
                 }
 
                 if (args[1] == 'name') {
                     if (args[2]) {
                         discord.user.setUsername(args.slice(2, args.length - 1).join(' '));
                         msg.channel.send(`Ура! Теперь меня зовут ${args.slice(2, args.length - 1).join(' ')}`)
-                            .then(() => msg.delete(1000 * 2));
+                            .then(botMsg => (botMsg as Discord.Message).delete(1000 * 2));
                     }
                     else msg.channel.send('Ошибка! Вы не указали имя')
-                        .then(() => msg.delete(1000 * 2));
+                        .then(botMsg => (botMsg as Discord.Message).delete(1000 * 2));
                 }
                 break;
 
