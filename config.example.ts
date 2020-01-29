@@ -10,5 +10,12 @@ export = {
 
     GITHUB_API_KEY: '',
     GITHUB_USERNAME: '',
-    GITHUB_REPO_NAME: ''
+    GITHUB_REPO_NAME: '',
+
+    text: {
+        github: {
+            TEMPLATE: '+++ title = "%title%" date = %date*YYYY-MM-DD% description = "%description%" +++\n\n%photos%',
+            NO_DESCRIPTION: 'Описание отсутствует'
+        }
+    }
 }

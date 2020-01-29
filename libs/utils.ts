@@ -94,7 +94,14 @@ export class QueueManager {
                     message: `Новый пост - ${id}.md`,
                     content:
                         Buffer.from(
-                            `+++ title = "${gitText ? gitText.split('\n')[0] : `${id}.md`}" date = ${moment(date).format('YYYY-MM-DD')} description = "${gitText ? gitText.slice(0, 25) : 'Описание отсутствует'}..." +++\n\n${photos}`).toString('base64')
+                            config.text.github.TEMPLATE
+                                .replace(new RegExp('%title%', 'g'), `${gitText ? gitText.split('\n')[0] : `${id}.md`}`)
+                                .replace(new RegExp('%date\*([^\s]+)%', 'g'), moment(date).format(config.text.github.TEMPLATE.split('%date')[1].replace('%', '')))
+                                .replace(new RegExp('%description%', 'g'), gitText ?
+                                    gitText.slice(0, 25) + (gitText.length > 25 ? '...' : '')
+                                    : config.text.github.NO_DESCRIPTION)
+                                .replace(new RegExp('%photos%', 'g'), photos)
+                        ).toString('base64')
                 }
             }, (err, res, __) => {
                 if (!res) console.error('Ошибка при аплоуде на GitHub');
