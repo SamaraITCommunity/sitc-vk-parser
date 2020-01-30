@@ -6,6 +6,7 @@ import { EventEmitter } from 'events';
 import { VKResponse, VKWallGetResponse } from '../../interfaces';
 import { db } from './../../server';
 import { getTimestamp } from '../utils';
+import config = require('../../config');
 
 let API_GATEWAY = 'https://api.vk.com/method';
 
@@ -67,6 +68,6 @@ export = class VKParser {
                         });
                 })
                 .catch(err => this.ee.emit('error', err));
-        }, 1000 * 60 * 30);
+        }, 1000 * 60 * config.VK_CHECK_RATE);
     }
 }
