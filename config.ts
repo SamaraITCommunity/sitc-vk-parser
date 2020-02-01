@@ -12,5 +12,12 @@ export = {
 
     GITHUB_USERNAME: 'humb1t',
     GITHUB_REPO_NAME: 'SamaraITCommunity/site',
-    GITHUB_API_KEY: process.env.GITHUB_API_KEY
+    GITHUB_API_KEY: process.env.GITHUB_API_KEY,
+
+    text: {
+        github: {
+            TEMPLATE: '+++ title = "%title%" date = %date*YYYY-MM-DD% description = "%description%" +++\n\n%photos%',
+            NO_DESCRIPTION: 'Описание отсутствует'
+        }
+    }
 }

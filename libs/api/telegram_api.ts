@@ -27,11 +27,30 @@ export = class TelegramAPI {
     }
 
     sendMessage(text: string, chatID: string) {
+        /* todo: сделать это нормальным
+        Моё решение слишком тучное и глупое. 
+        Задача: найти хэштеги и добавить им ведущий слеш, чтобы парсер игнорировал хэштэги. 
+        Слеш нужно добавить перед всеми _ и * в хэштеге. 
+        Идеальное вариант решения: написать правильное регулярное выражение, в котором будут группы. 
+        Нужно разделить символы и в replace для каждой использовать $1, $2... и заменить это на \\$.
+        */
         chatID = '@' + chatID.replace('@', '');
         return new Promise((resolve, reject) => {
-            this.call('sendMessage', { chat_id: chatID, text: text, parse_mode: 'Markdown' })
+            let hashTags = text.match(new RegExp('(?:\s|^)?#[A-Za-z0-9\-\.\_]+(?:\s|$)', 'gi'));
+            let fixedHashTags = hashTags
+                .map(tag => tag
+                    .replace(new RegExp('_', 'g'), '\\_')
+                    .replace(new RegExp('*', 'g'), '\\*')
+                );
+
+            this.call('sendMessage', {
+                chat_id: chatID, text: text
+                    .split(' ')
+                    .map(word => { if (hashTags.includes(word)) return fixedHashTags[hashTags.indexOf(word)]; else return word; })
+                    .join(' '), parse_mode: 'Markdown'
+            })
                 .then(data => resolve(data))
-                .catch(err => reject('Error sending message to chat ${err}'));
+                .catch(err => reject(err));
         });
     }
 
