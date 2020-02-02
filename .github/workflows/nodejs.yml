@@ -1,11 +1,10 @@
-name: Node.js CI
+name: main
 on: [push]
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+    name: Build and test
     steps:
-      - name: GitHub Action for Yarn
-        uses: Borales/actions-yarn@v2.1.0
-        with:
-          # Yarn command
-          cmd: yarn install && yarn build
+      - uses: actions/checkout@v1
+      - uses: bahmutov/npm-install@v1
+      - run: yarn install && yarn build
