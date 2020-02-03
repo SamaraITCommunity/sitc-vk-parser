@@ -7,4 +7,4 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: bahmutov/npm-install@v1
-      - run: yarn install && yarn build
+      - run: yarn install && npx tsc server.ts --noEmit
