@@ -1,10 +1,9 @@
 import request = require('request');
 import { db, discord, telegram } from '../server';
-import { ObjectChain } from 'lodash';
-import { VKPost, VKPhoto } from '../interfaces';
-import config = require('../config');
+import { VKPost, VKPhoto, Task } from '../interfaces';
+import config from '../config';
 import Discord = require('discord.js');
-import moment = require('moment');
+import moment from 'moment';
 
 export function getTimestamp() {
     return Math.round(+new Date() / 1000);
@@ -39,20 +38,14 @@ export function randomString(length: number) {
     return result;
 }
 
-interface Task {
-    id: string;
-    social: 'telegram' | 'discord' | 'github';
-    post: VKPost;
-}
-
 export class QueueManager {
     hasPostInQueue(postID: number) {
-        let queue = db.get('queue') as ObjectChain<{ tasks: { [key: string]: Task } }>;
+        let queue = db.get('queue');
         return !queue.get('tasks').find(t => t.post.id == postID).isUndefined().value();
     }
 
     retryQueue() {
-        let queue = db.get('queue') as ObjectChain<{ tasks: { [key: string]: Task } }>;
+        let queue = db.get('queue');
         Object.keys(queue.get('tasks').value()).forEach(key => {
             this.handle(queue.get('tasks').get(key).value());
             console.log(`Попытался отправить ${key} ещё раз`);
@@ -60,15 +53,21 @@ export class QueueManager {
     }
 
     addToQueue(social: 'telegram' | 'discord' | 'github', post: VKPost, handleImmediately?: boolean) {
-        let queue = db.get('queue') as ObjectChain<{ tasks: { [key: string]: Task } }>;
+        let queue = db.get('queue');
         let newID = randomString(16);
         queue.get('tasks').set(newID, { id: newID, social: social, post: post }).write();
         if (handleImmediately) this.handle({ id: newID, social: social, post: post });
     }
 
     handle(task: Task) {
-        let queue = db.get('queue') as ObjectChain<{ tasks: { [key: string]: Task } }>;
+        let queue = db.get('queue');
         if (task.social == 'github') {
+            if (!config.GITHUB_API_KEY || !config.GITHUB_REPO_NAME || !config.GITHUB_USERNAME) {
+                console.log('Источник "GitHub" не подключен. Пропускаем.');
+                queue.get('tasks').unset(task.id).write();
+                return;
+            }
+
             let post = task.post;
 
             let gitText = replaceAll(post.text, '@samara_it_community', '');
@@ -81,9 +80,8 @@ export class QueueManager {
             let date = new Date();
             let id = randomString(16);
 
-            let photos: string;
+            let photos = '';
             if (post.attachments) if (post.attachments.length > 0) photos = post.attachments.filter(a => a.type == 'photo').map((p: VKPhoto) => `\n\n![Alt](${p.photo.sizes[p.photo.sizes.length - 1].url})`).join('');
-            else photos = '';
             request.put(`https://api.github.com/repos/${config.GITHUB_USERNAME}/${config.GITHUB_REPO_NAME}/contents/content/${id}.md`, {
                 json: true,
                 headers: {
@@ -96,7 +94,7 @@ export class QueueManager {
                         Buffer.from(
                             config.text.github.TEMPLATE
                                 .replace(new RegExp('%title%', 'g'), `${gitText ? gitText.split('\n')[0] : `${id}.md`}`)
-                                .replace(new RegExp('%date\*([^\s]+)%', 'g'), moment(date).format(config.text.github.TEMPLATE.split('%date')[1].replace('%', '')))
+                                .replace(new RegExp('\%date\.([^\s]+)\%', 'g'), moment(date).format('YYYY-MM-DD'))
                                 .replace(new RegExp('%description%', 'g'), gitText ?
                                     gitText.slice(0, 25) + (gitText.length > 25 ? '...' : '')
                                     : config.text.github.NO_DESCRIPTION)
@@ -111,6 +109,12 @@ export class QueueManager {
         }
 
         if (task.social == 'telegram') {
+            if (!config.TELEGRAM_API_KEY || !config.TELEGRAM_CHANNEL_ID) {
+                console.log('Источник "Telegram" не подключен. Пропускаем.');
+                queue.get('tasks').unset(task.id).write();
+                return;
+            }
+
             let promiseList = new Array<Promise<any>>();
 
             let post = task.post;
@@ -159,6 +163,12 @@ export class QueueManager {
         }
 
         if (task.social == 'discord') {
+            if (!config.DISCORD_ADMIN_ROLE || !config.DISCORD_API_KEY || !config.DISCORD_CHANNEL_NAME) {
+                console.log('Источник "Discord" не подключен. Пропускаем.');
+                queue.get('tasks').unset(task.id).write();
+                return;
+            }
+
             let promiseList = new Array<Promise<any>>();
 
             let channel = discord.guilds.first().channels.find(channel => channel.name == config.DISCORD_CHANNEL_NAME) as Discord.TextChannel;

@@ -1,3 +1,26 @@
+export interface DBScheme {
+    queue: {
+        tasks: {
+            [key: string]: Task
+        }
+    },
+    vk: { lastCheckTime: number }
+}
+
+export interface Task {
+    id: string;
+    social: 'telegram' | 'discord' | 'github';
+    post: VKPost;
+}
+
+export interface TelegramResponse {
+    ok: boolean;
+    result?: any;
+    description?: string;
+    error_code?: number;
+}
+
+//#region VK
 export interface VKResponse {
     error?: {
         error_msg: string;
@@ -156,3 +179,4 @@ export interface VKLink extends VKAttachment {
         }
     }
 }
+//#endregion VK

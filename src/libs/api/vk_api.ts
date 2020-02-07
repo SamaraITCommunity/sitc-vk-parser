@@ -4,7 +4,7 @@ import queryString = require('query-string');
 import { EventEmitter } from 'events';
 
 import { VKResponse, VKWallGetResponse } from '../../interfaces';
-import { db } from './../../server';
+import { db } from '../../server';
 import { getTimestamp } from '../utils';
 import config = require('../../config');
 
