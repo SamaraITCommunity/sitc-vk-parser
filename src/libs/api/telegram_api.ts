@@ -1,14 +1,8 @@
 import request = require('request');
 import queryString = require('query-string');
+import { TelegramResponse } from '../../interfaces';
 
 let API_GATEWAY = 'https://api.telegram.org';
-
-interface TelegramResponse {
-    ok: boolean;
-    result?: any;
-    description?: string;
-    error_code?: number;
-}
 
 export = class TelegramAPI {
     private readonly token: string;
@@ -16,7 +10,7 @@ export = class TelegramAPI {
     private call(method: string, data: any) {
         return new Promise((resolve, reject) => {
             request(`${API_GATEWAY}/bot${this.token}/${method}?${queryString.stringify(data)}`, { json: true }, (err, res, body: TelegramResponse) => {
-                console.log('Telegram call result: ${res}');
+                console.log(`Telegram call result: ${res}`);
                 if (!res) reject('Не достучались до Telegram. Скорее-всего, Ваш провайдер их блокирует');
                 else if (err) reject(`Ошибка при обращении к Telegram API ${err}`);
                 else if (!body) reject('Не достучались до Telegram. Скорее-всего, Ваш провайдер их блокирует');
@@ -36,7 +30,7 @@ export = class TelegramAPI {
         */
         chatID = '@' + chatID.replace('@', '');
         return new Promise((resolve, reject) => {
-            let hashTags = text.match(new RegExp('(?:\s|^)?#[A-Za-z0-9\-\.\_]+(?:\s|$)', 'gi'));
+            let hashTags = text.match(new RegExp('(?:\s|^)?#[A-Za-z0-9\-\.\_]+(?:\s|$)', 'gi')) || [];
             let fixedHashTags = hashTags
                 .map(tag => tag
                     .replace(new RegExp('_', 'g'), '\\_')

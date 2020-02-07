@@ -1,7 +1,7 @@
 require('dotenv').config();
 import Discord = require('discord.js');
 import VKParser = require('./libs/api/vk_api');
-import { VKPost } from './interfaces';
+import { VKPost, DBScheme } from './interfaces';
 import TelegramAPI = require('./libs/api/telegram_api');
 import config from './config';
 import { QueueManager, getTimestamp } from './libs/utils';
@@ -9,7 +9,8 @@ let queueManager = new QueueManager();
 
 import low = require('lowdb');
 import FileSync = require('lowdb/adapters/FileSync');
-let adapter = new FileSync('db.json');
+
+let adapter = new FileSync<DBScheme>('db.json');
 export let db = low(adapter);
 db.defaults({
     queue: {
@@ -35,7 +36,7 @@ discord.on('message', msg => {
             case '$set':
                 if (args[1] == 'channel') {
                     if (args[2]) {
-                        let newChannel = discord.guilds.first().channels.find(channel => channel.name == args[2]);
+                        let newChannel = discord.guilds.first().channels.find(channel => channel.name == args[2]) || discord.guilds.first().channels.find(channel => channel.name == args[2].replace('#', ''));
                         if (newChannel) {
                             config.DISCORD_CHANNEL_NAME = newChannel.name;
                             fs.writeFileSync('./config.ts', fs.readFileSync('./config.ts', 'utf8').replace(new RegExp('DISCORD_CHANNEL_NAME: \'([^\s]+)\''), `DISCORD_CHANNEL_NAME: '${newChannel}'`))
