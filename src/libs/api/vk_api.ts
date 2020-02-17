@@ -56,12 +56,18 @@ export = class VKParser {
         setInterval(() => {
             this.getPosts({ owner_id: this.groupID })
                 .then(data => {
-                    console.log(`Get posts received data: ${JSON.stringify(data)}.`);
+          //console.log(`Get posts received data: ${JSON.stringify(data)}.`);
                     let checkTime = getTimestamp();
+                    console.log(`Check Time: ${JSON.stringify(checkTime)} and items length is ${data.items.length} and last check time is: ${this.lastCheckTime}.`);
                     if (data.items.length > 0)
-                        if (data.items[0].date > this.lastCheckTime) data.items.forEach((post, i, arr) => {
-                            if (post.date > this.lastCheckTime)
+                        console.log('There are items.');
+                        data.items.forEach((post, i, arr) => {
+                          if (post.date > this.lastCheckTime){
+                              console.log(`New post: ${JSON.stringify(post)}.`);
                                 this.ee.emit('newPost', post);
+          } else {
+                              console.log(`Old post: ${JSON.stringify(post)}.`);
+          }
                             if (i == arr.length - 1) {
                                 this.lastCheckTime = checkTime;
                                 db.set('vk.lastCheckTime', checkTime).write();
