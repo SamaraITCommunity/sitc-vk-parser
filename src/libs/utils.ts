@@ -138,21 +138,26 @@ export class QueueManager {
                     switch (attach.type) {
                         case 'link':
                             if (!attach.link.button) promiseList.push(telegram.sendMessage(`Ссылка: "${attach.link.url}". Подробнее - [нажмите на ссылку](${attach.link.url})`, config.TELEGRAM_CHANNEL_ID));
-                            else if (attach.link.button.title == 'Читать') {
+                            else if (attach.link.button && attach.link.button.title == 'Читать') {
                                 promiseList.push(telegram.sendMessage(`Статья "${attach.link.title}". Читать - [нажмите на ссылку](${attach.link.url})`, config.TELEGRAM_CHANNEL_ID));
                             }
                             break;
                         case 'photo':
                             let url = attach.photo.sizes[attach.photo.sizes.length - 1].url;
                             promiseList.push(telegram.sendPhoto(url, config.TELEGRAM_CHANNEL_ID));
+                            break;
                         case 'video':
                             promiseList.push(telegram.sendVideo(attach.video.owner_id, attach.video.id, attach.video.access_key, config.TELEGRAM_CHANNEL_ID));
+                            break;
                         case 'podcast':
                             promiseList.push(telegram.sendMessage(`Подкаст: ${attach.podcast.url}&access_key=${attach.podcast.access_key}`, config.TELEGRAM_CHANNEL_ID));
+                            break;
                         case 'audio':
                             promiseList.push(telegram.sendAudio(attach.audio.url, config.TELEGRAM_CHANNEL_ID));
+                            break;
                         case 'doc':
                             promiseList.push(telegram.sendDocument(attach.doc.url, attach.doc.access_key, config.TELEGRAM_CHANNEL_ID));
+                            break;
                         default:
                             break;
                     }
@@ -194,21 +199,26 @@ export class QueueManager {
                 post.attachments.forEach(attach => {
                     switch (attach.type) {
                         case 'link':
-                            if (attach.link.button.title == 'Читать') promiseList.push(
+                            if (attach.link.button && attach.link.button.title == 'Читать') promiseList.push(
                                 channel.send('', { embed: { title: attach.link.title, description: `Новая статья в группе ВК. Читать - [нажмите на ссылку](${attach.link.url})`, image: { url: attach.link.photo.sizes[attach.link.photo.sizes.length - 1].url } } })
                             );
                             break;
                         case 'photo':
                             let url = attach.photo.sizes[attach.photo.sizes.length - 1].url;
                             promiseList.push(channel.send('', { file: url }));
+                            break;
                         case 'video':
                             promiseList.push(channel.send(`Видео: https://vk.com/video?z=video${attach.video.owner_id}_${attach.video.id}&access_key=${attach.video.access_key}`));
+                            break;
                         case 'podcast':
                             promiseList.push(channel.send(`Подкаст: ${attach.podcast.url}?${attach.podcast.access_key}`));
+                            break;
                         case 'audio':
                             promiseList.push(channel.send('', { file: attach.audio.url.split('.mp3')[0] + '.mp3' }));
+                            break;
                         case 'doc':
                             promiseList.push(channel.send('', { file: `${attach.doc.url}&access_key=${attach.doc.access_key}` }));
+                            break;
                         default:
                             break;
                     }
