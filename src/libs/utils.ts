@@ -40,11 +40,13 @@ export function randomString(length: number) {
 
 export class QueueManager {
     hasPostInQueue(postID: number) {
+        console.log(`Check post with id: ${postID} in the queue.`);
         let queue = db.get('queue');
         return !queue.get('tasks').find(t => t.post.id == postID).isUndefined().value();
     }
 
     retryQueue() {
+        console.log('Retry queue.');
         let queue = db.get('queue');
         Object.keys(queue.get('tasks').value()).forEach(key => {
             this.handle(queue.get('tasks').get(key).value());

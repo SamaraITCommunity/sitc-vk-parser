@@ -56,6 +56,7 @@ export = class VKParser {
         setInterval(() => {
             this.getPosts({ owner_id: this.groupID })
                 .then(data => {
+                    console.log(`Get posts received data: ${JSON.stringify(data)}.`);
                     let checkTime = getTimestamp();
                     if (data.items.length > 0)
                         if (data.items[0].date > this.lastCheckTime) data.items.forEach((post, i, arr) => {

@@ -87,8 +87,10 @@ discord.login(config.DISCORD_API_KEY);
 vk_parser.ee.on('ready', () => console.log('Начали слушать группу в ВК'));
 vk_parser.ee.on('error', err => console.error(`Произошла ошибка ${err}! Ошибка: ${JSON.stringify(err)}`));
 vk_parser.ee.on('newPost', (post: VKPost) => {
+    console.log('Check new posts.');
     queueManager.retryQueue();
     if (!queueManager.hasPostInQueue(post.id)) {
+        console.log(`Add post with id: ${post.id} to queue.`); 
         queueManager.addToQueue('discord', post, true);
         queueManager.addToQueue('telegram', post, true);
         queueManager.addToQueue('github', post, true);
